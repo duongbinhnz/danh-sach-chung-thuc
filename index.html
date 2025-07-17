@@ -328,9 +328,11 @@
         showModal(`Xác nhận chưa nhận hồ sơ số ${i}?`, () => applyStatus("not-received"));
       });
 
-      if (saved && saved.type) {
-        applyStatus(saved.type, saved.date);
-      }
+   if (saved && saved.type) {
+  applyStatus(saved.type, saved.date);
+} else {
+  row.classList.add("not-received"); // Thêm dòng này
+}
 
       tbody.appendChild(row);
     }
