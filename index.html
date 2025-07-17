@@ -310,8 +310,10 @@
           crossBtn.classList.add("selected");
           tickBtn.classList.remove("selected");
         }
-        tickBtn.classList.add("disabled");
-        crossBtn.classList.add("disabled");
+       if (type === "received") {
+  tickBtn.classList.add("disabled");
+  crossBtn.classList.add("disabled");
+}
         dateCell.textContent = now;
 
         savedStatus[rowId] = { type, date: now };
