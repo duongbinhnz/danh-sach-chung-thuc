@@ -40,6 +40,8 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
+      border-radius: 10px;
+      overflow: hidden;
     }
 
     th, td {
@@ -49,14 +51,23 @@
       white-space: nowrap;
     }
 
+    /* Zebra Striping */
+    tbody tr:nth-child(even):not(.received):not(.not-received) {
+      background-color: #f9f9f9;
+    }
+
     tr.received {
-      background-color: #d4edda;
+      background-color: #d4edda !important;
       color: #155724;
     }
 
     tr.not-received {
-      background-color: #f8d7da;
+      background-color: #f8d7da !important;
       color: #721c24;
+    }
+
+    tbody tr:hover {
+      background-color: #e8f0fe !important;
     }
 
     .btn {
@@ -108,7 +119,6 @@
       background-color: #a72836;
     }
 
-    /* Modal xác nhận */
     .modal {
       display: none;
       position: fixed;
@@ -199,7 +209,7 @@
     </div>
   </div>
 
-  <!-- Modal xác nhận chung -->
+  <!-- Modal xác nhận -->
   <div class="modal" id="confirmModal">
     <div class="modal-content">
       <p id="confirmText">Bạn chắc chắn chứ?</p>
@@ -222,7 +232,7 @@
     </div>
   </div>
 
-  <!-- SheetJS CDN -->
+  <!-- SheetJS để export Excel -->
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script>
     const tbody = document.querySelector("#list tbody");
@@ -234,7 +244,6 @@
 
     const passwordModal = document.getElementById("passwordModal");
     const passwordInput = document.getElementById("passwordInput");
-
     let pendingAction = null;
 
     function showModal(message, callback) {
@@ -266,7 +275,7 @@
 
     function confirmReset() {
       const entered = passwordInput.value;
-      const secret = atob("dHVuZ2R1b25naGo="); // => "tungduonghj"
+      const secret = atob("dHVuZ2R1b25naGo="); // "tungduonghj"
       if (entered === secret) {
         localStorage.removeItem("hoso_status");
         location.reload();
@@ -300,22 +309,19 @@
         if (type === "received") {
           row.classList.add("received");
           row.classList.remove("not-received");
-          statusCell.textContent = "Đã nhận hồ sơ lưu";
+          statusCell.innerHTML = "✅ Đã nhận hồ sơ lưu";
           tickBtn.classList.add("selected");
           crossBtn.classList.remove("selected");
+          tickBtn.classList.add("disabled");
+          crossBtn.classList.add("disabled");
         } else {
           row.classList.add("not-received");
           row.classList.remove("received");
-          statusCell.textContent = "Chưa nhận hồ sơ lưu";
+          statusCell.innerHTML = "❌ Chưa nhận hồ sơ lưu";
           crossBtn.classList.add("selected");
           tickBtn.classList.remove("selected");
         }
-       if (type === "received") {
-  tickBtn.classList.add("disabled");
-  crossBtn.classList.add("disabled");
-}
         dateCell.textContent = now;
-
         savedStatus[rowId] = { type, date: now };
         localStorage.setItem("hoso_status", JSON.stringify(savedStatus));
         tickBtn.blur();
@@ -330,11 +336,11 @@
         showModal(`Xác nhận chưa nhận hồ sơ số ${i}?`, () => applyStatus("not-received"));
       });
 
-   if (saved && saved.type) {
-  applyStatus(saved.type, saved.date);
-} else {
-  row.classList.add("not-received"); // Thêm dòng này
-}
+      if (saved && saved.type) {
+        applyStatus(saved.type, saved.date);
+      } else {
+        row.classList.add("not-received");
+      }
 
       tbody.appendChild(row);
     }
