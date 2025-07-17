@@ -19,7 +19,7 @@
       border-radius: 12px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
       width: 90%;
-      max-width: 600px;
+      max-width: 700px;
     }
 
     .header-info {
@@ -51,7 +51,6 @@
       padding: 10px 8px;
       text-align: center;
       border: 1px solid #ddd;
-      min-width: 150px;
       white-space: nowrap;
     }
 
@@ -167,6 +166,7 @@
         <tr>
           <th>STT</th>
           <th>Trạng thái</th>
+          <th>Ngày xác nhận</th>
           <th>Thao tác</th>
         </tr>
       </thead>
@@ -187,7 +187,7 @@
     </div>
   </div>
 
-  <!-- SheetJS CDN để xuất Excel -->
+  <!-- SheetJS để xuất Excel -->
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script>
     const tbody = document.querySelector("#list tbody");
@@ -225,6 +225,7 @@
       row.innerHTML = `
         <td>${i}</td>
         <td class="status">-</td>
+        <td class="date">-</td>
         <td>
           <button class="btn tick" title="Đã nhận">✅</button>
           <button class="btn cross" title="Chưa nhận">❌</button>
@@ -234,8 +235,10 @@
       const tickBtn = row.querySelector(".tick");
       const crossBtn = row.querySelector(".cross");
       const statusCell = row.querySelector(".status");
+      const dateCell = row.querySelector(".date");
 
-      const applyStatus = (type) => {
+      const applyStatus = (type, confirmedTime = null) => {
+        const now = confirmedTime || new Date().toLocaleString('vi-VN');
         if (type === "received") {
           row.classList.add("received");
           row.classList.remove("not-received");
@@ -251,7 +254,9 @@
         }
         tickBtn.classList.add("disabled");
         crossBtn.classList.add("disabled");
-        savedStatus[rowId] = type;
+        dateCell.textContent = now;
+
+        savedStatus[rowId] = { type, date: now };
         localStorage.setItem("hoso_status", JSON.stringify(savedStatus));
         tickBtn.blur();
         crossBtn.blur();
@@ -265,20 +270,22 @@
         showModal(`Xác nhận chưa nhận hồ sơ số ${i}?`, () => applyStatus("not-received"));
       });
 
-      if (saved === "received" || saved === "not-received") {
-        applyStatus(saved);
+      // load từ localStorage
+      if (saved && saved.type) {
+        applyStatus(saved.type, saved.date);
       }
 
       tbody.appendChild(row);
     }
 
     function exportToExcel() {
-      const data = [["STT", "Trạng thái"]];
+      const data = [["STT", "Trạng thái", "Ngày xác nhận"]];
       const rows = document.querySelectorAll("#list tbody tr");
       rows.forEach(row => {
         const stt = row.children[0].textContent;
         const status = row.children[1].textContent;
-        data.push([stt, status]);
+        const date = row.children[2].textContent;
+        data.push([stt, status, date]);
       });
 
       const worksheet = XLSX.utils.aoa_to_sheet(data);
