@@ -30,11 +30,13 @@
       border-collapse: collapse;
       font-size: 14px;
     }
-    th, td {
-      padding: 10px 8px;
-      text-align: center;
-      border: 1px solid #ddd;
-    }
+th, td {
+  padding: 10px 8px;
+  text-align: center;
+  border: 1px solid #ddd;
+  min-width: 150px; /* thêm dòng này */
+  white-space: nowrap; /* ngăn xuống dòng */
+}
     tr.received {
       background-color: #d4edda;
       color: #155724;
