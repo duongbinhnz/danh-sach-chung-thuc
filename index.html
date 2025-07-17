@@ -6,37 +6,50 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #f9f9f9;
-      padding: 30px;
+      background: #f0f2f5;
+      padding: 40px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      background: white;
+      padding: 25px 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      width: 90%;
+      max-width: 600px;
     }
     h1 {
       text-align: center;
       color: #333;
+      margin-bottom: 20px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      font-size: 14px;
     }
     th, td {
-      padding: 10px 12px;
+      padding: 10px 8px;
       text-align: center;
       border: 1px solid #ddd;
     }
     tr.received {
-      background-color: #d4edda; /* Xanh */
+      background-color: #d4edda;
       color: #155724;
     }
     tr.not-received {
-      background-color: #f8d7da; /* Đỏ */
+      background-color: #f8d7da;
       color: #721c24;
     }
     .btn {
       cursor: pointer;
-      font-size: 18px;
-      padding: 5px 10px;
+      font-size: 16px;
+      padding: 4px 8px;
       border: none;
       background: none;
+      transition: all 0.2s ease-in-out;
     }
     .tick {
       color: green;
@@ -44,20 +57,39 @@
     .cross {
       color: red;
     }
+    .selected {
+      transform: scale(1.3);
+    }
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 13px;
+      color: #666;
+    }
+    .footer span {
+      display: block;
+      margin-top: 4px;
+    }
   </style>
 </head>
 <body>
-  <h1>Danh sách số chứng thực</h1>
-  <table id="list">
-    <thead>
-      <tr>
-        <th>STT</th>
-        <th>Trạng thái</th>
-        <th>Thao tác</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="container">
+    <h1>Danh sách số chứng thực</h1>
+    <table id="list">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Trạng thái</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="footer">
+      Quản lý hồ sơ bởi <strong>Dương</strong><br>
+      <span>Code bởi Nguyễn Bình Dương 😎</span>
+    </div>
+  </div>
 
   <script>
     const tbody = document.querySelector("#list tbody");
@@ -81,12 +113,16 @@
         row.classList.remove("not-received");
         row.classList.add("received");
         statusCell.textContent = "Đã nhận hồ sơ lưu";
+        tickBtn.classList.add("selected");
+        crossBtn.classList.remove("selected");
       });
 
       crossBtn.addEventListener("click", () => {
         row.classList.remove("received");
         row.classList.add("not-received");
         statusCell.textContent = "Chưa nhận hồ sơ lưu";
+        crossBtn.classList.add("selected");
+        tickBtn.classList.remove("selected");
       });
 
       tbody.appendChild(row);
