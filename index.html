@@ -4,10 +4,7 @@
   <meta charset="UTF-8">
   <title>Danh sách hồ sơ lưu tháng 7/2025</title>
   <style>
-    /* ---------- Cursors ---------- */
     body, button { cursor: pointer; }
-
-    /* ---------- Page style ---------- */
     body {
       font-family: 'Segoe UI', sans-serif;
       background: #f0f2f5;
@@ -33,8 +30,6 @@
       text-align: center; margin-bottom: 20px;
       font-size: 20px; color: #333;
     }
-
-    /* ---------- Table ---------- */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -62,8 +57,6 @@
     tbody tr:hover {
       background-color: #e8f0fe !important;
     }
-
-    /* ---------- Buttons ---------- */
     .btn {
       font-size: 16px; padding: 4px 8px;
       border: none; background: none;
@@ -74,29 +67,23 @@
     .default-cross { font-size: 22px; }
     .selected { transform: scale(1.3); }
     .disabled { opacity: 0.5; pointer-events: none; }
-
-    /* ---------- Action Buttons ---------- */
     .button-row {
       margin-top: 20px; text-align: center;
     }
     .action-btn {
       padding: 10px 20px; margin: 0 10px;
       border: none; color: white; border-radius: 6px;
-      font-weight: bold; cursor: pointer;
-      transition: background 0.2s;
+      font-weight: bold; transition: background 0.2s;
     }
     .action-btn:nth-child(1) { background:#007bff; }
     .action-btn:nth-child(1):hover { background:#0056b3; }
     .danger-btn { background:#dc3545; }
     .danger-btn:hover { background:#a72836; }
-
-    /* ---------- Modal ---------- */
     .modal {
       display:none; position:fixed; z-index:999;
       left:0; top:0; width:100%; height:100%;
       background-color:rgba(0,0,0,0.5);
-      align-items:center;
-      justify-content:center;
+      align-items:center; justify-content:center;
     }
     .modal-content {
       background:#fff; padding:20px 30px;
@@ -122,21 +109,17 @@
       padding:8px; width:80%; border:1px solid #ccc;
       font-size:14px; border-radius:6px;
     }
-
     @keyframes fadeIn {
       from { transform: scale(0.95); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
     }
-
-    /* ---------- Skeleton loading ---------- */
     .skeleton {
       animation: shimmer 1.5s infinite;
       background: linear-gradient(to right, #eee 8%, #ddd 18%, #eee 33%);
       background-size: 800px 104px;
     }
     .skeleton-row td {
-      height: 20px;
-      border-color: transparent;
+      height: 20px; border-color: transparent;
       background-color: #eee;
     }
     @keyframes shimmer {
@@ -171,7 +154,6 @@
     </div>
   </div>
 
-  <!-- Popup và Modals -->
   <div class="modal" id="confirmModal">
     <div class="modal-content">
       <p id="confirmText"></p>
@@ -192,51 +174,42 @@
     </div>
   </div>
 
-  <!-- Thư viện xuất Excel -->
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script>
     const tbody = document.querySelector("#list tbody");
-    const savedStatus = JSON.parse(localStorage.getItem("hoso_status")) || {};
-
+    const saved = JSON.parse(localStorage.getItem("hoso_status")) || {};
     const modal = document.getElementById("confirmModal");
     const confirmText = document.getElementById("confirmText");
     const yesBtn = document.getElementById("confirmYes");
     const noBtn = document.getElementById("confirmNo");
-
     const pwdModal = document.getElementById("passwordModal");
     const pwdInput = document.getElementById("passwordInput");
-    let pendingAction = null;
+    let pending = null;
 
     function showModal(msg, cb) {
       confirmText.textContent = msg;
       modal.style.display = "flex";
-      pendingAction = cb;
+      pending = cb;
     }
-    yesBtn.onclick = () => { pendingAction && pendingAction(); modal.style.display = "none"; pendingAction=null; };
-    noBtn.onclick = () => { modal.style.display = "none"; pendingAction=null; };
-
+    yesBtn.onclick = () => { pending && pending(); modal.style.display = "none"; pending = null; };
+    noBtn.onclick = () => { modal.style.display = "none"; pending = null; };
     function promptReset() {
-      pwdInput.value = '';
-      pwdModal.style.display = "flex";
-      pwdInput.focus();
+      pwdInput.value = ''; pwdModal.style.display = "flex"; pwdInput.focus();
     }
     function closePasswordModal() { pwdModal.style.display = "none"; }
     function confirmReset() {
-      const secret = atob("dHVuZ2R1b25naGo=");
-      if (pwdInput.value === secret) {
+      if (pwdInput.value === atob("dHVuZ2R1b25naGo=")) {
         localStorage.removeItem("hoso_status");
         location.reload();
       } else alert("Sai mật khẩu!");
     }
 
     function createSkeleton(rows=10) {
-      for (let i=0; i<rows; i++) {
+      for (let i=0;i<rows;i++) {
         const tr = document.createElement("tr");
         tr.className = "skeleton-row";
-        for (let k=0; k<4; k++) {
-          const td = document.createElement("td");
-          td.className = "skeleton";
-          tr.appendChild(td);
+        for (let j=0;j<4;j++){
+          const td = document.createElement("td"); td.className="skeleton"; tr.appendChild(td)
         }
         tbody.appendChild(tr);
       }
@@ -244,69 +217,59 @@
 
     function loadData() {
       tbody.innerHTML = '';
-      for (let i = 864; i <= 1000; i++) {
-        const row = document.createElement("tr");
-        const rowId = `stt_${i}`;
-        const saved = savedStatus[rowId];
-
-        row.innerHTML = `
-          <td>${i}</td>
-          <td class="status">Chưa nhận hồ sơ lưu</td>
+      for (let i=864; i<=1000; i++){
+        const tr = document.createElement("tr");
+        const id = `stt_${i}`;
+        const sv = saved[id];
+        tr.innerHTML = `
+          <td>${i}</td><td class="status">Chưa nhận hồ sơ lưu</td>
           <td class="date">-</td>
-          <td>
-            <button class="btn tick">✅</button>
-            <button class="btn cross default-cross">❌</button>
-          </td>
+          <td><button class="btn tick">✅</button><button class="btn cross default-cross">❌</button></td>
         `;
+        const [tickBtn, crossBtn] = tr.querySelectorAll("button");
+        const statusCell = tr.querySelector(".status");
+        const dateCell = tr.querySelector(".date");
 
-        const tickBtn = row.querySelector(".tick");
-        const crossBtn = row.querySelector(".cross");
-        const statusCell = row.querySelector(".status");
-        const dateCell = row.querySelector(".date");
-
-        const applyStatus = (type, time=null) => {
-          const now = time || new Date().toLocaleString('vi-VN');
-          if (type === 'received') {
-            row.classList.add("received");
-            statusCell.innerHTML = "✅ Đã nhận hồ sơ lưu";
-            tickBtn.classList.add("selected", "disabled");
+        const apply = (type, time=null) => {
+          const t = time || new Date().toLocaleString('vi-VN');
+          statusCell.textContent = type === 'received' ? "Đã nhận hồ sơ lưu" : "Chưa nhận hồ sơ lưu";
+          dateCell.textContent = t;
+          if (type==='received') {
+            tr.classList.add("received");
+            tickBtn.classList.add("selected","disabled");
             crossBtn.classList.add("disabled");
           } else {
-            row.classList.add("not-received");
-            statusCell.innerHTML = "❌ Chưa nhận hồ sơ lưu";
+            tr.classList.add("not-received");
             crossBtn.classList.add("selected");
           }
-          dateCell.textContent = now;
-          savedStatus[rowId] = {type, date: now};
-          localStorage.setItem("hoso_status", JSON.stringify(savedStatus));
+          saved[id]={type,date:t};
+          localStorage.setItem("hoso_status", JSON.stringify(saved));
         };
 
-        tickBtn.onclick = () => showModal(`Xác nhận đã nhận hồ sơ số ${i}?`, () => applyStatus('received'));
-        crossBtn.onclick = () => showModal(`Xác nhận chưa nhận hồ sơ số ${i}?`, () => applyStatus('not-received'));
+        tickBtn.onclick = ()=> showModal(`Xác nhận đã nhận hồ sơ số ${i}?`,()=>apply('received'));
+        crossBtn.onclick = ()=> showModal(`Xác nhận chưa nhận hồ sơ số ${i}?`,()=>apply('not-received'));
 
-        if (saved && saved.type) applyStatus(saved.type, saved.date);
-        else row.classList.add("not-received");
+        if (sv && sv.type) apply(sv.type, sv.date);
+        else tr.classList.add("not-received");
 
-        tbody.appendChild(row);
+        tbody.appendChild(tr);
       }
       document.querySelector("table").style.opacity = 1;
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener("DOMContentLoaded", () => {
       createSkeleton(10);
       setTimeout(loadData, 600);
     });
 
     function exportToExcel() {
-      const data = [["STT","Trạng thái","Ngày xác nhận"]];
-      tbody.querySelectorAll("tr").forEach(r => {
-        const [stt,s,date] = [r.children[0].textContent, r.children[1].textContent, r.children[2].textContent];
-        data.push([stt, s, date]);
+      const data=[["STT","Trạng thái","Ngày xác nhận"]];
+      tbody.querySelectorAll("tr").forEach(r=>{
+        data.push([r.children[0].textContent, r.children[1].textContent, r.children[2].textContent]);
       });
-      const ws = XLSX.utils.aoa_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "HoSo7");
-      XLSX.writeFile(wb, "HoSo_Luu_Thang7_2025.xlsx");
+      const ws=XLSX.utils.aoa_to_sheet(data);
+      const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"HoSo7");
+      XLSX.writeFile(wb,"HoSo_Luu_Thang7_2025.xlsx");
     }
   </script>
 </body>
