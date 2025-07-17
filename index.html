@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Danh sách chứng thực</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f9f9f9;
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    tr.received {
+      background-color: #d4edda; /* Xanh */
+      color: #155724;
+    }
+    tr.not-received {
+      background-color: #f8d7da; /* Đỏ */
+      color: #721c24;
+    }
+    .btn {
+      cursor: pointer;
+      font-size: 18px;
+      padding: 5px 10px;
+      border: none;
+      background: none;
+    }
+    .tick {
+      color: green;
+    }
+    .cross {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>Danh sách số chứng thực</h1>
+  <table id="list">
+    <thead>
+      <tr>
+        <th>STT</th>
+        <th>Trạng thái</th>
+        <th>Thao tác</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const tbody = document.querySelector("#list tbody");
+
+    for (let i = 864; i <= 1000; i++) {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${i}</td>
+        <td class="status">-</td>
+        <td>
+          <button class="btn tick" title="Đã nhận">✅</button>
+          <button class="btn cross" title="Chưa nhận">❌</button>
+        </td>
+      `;
+
+      const tickBtn = row.querySelector(".tick");
+      const crossBtn = row.querySelector(".cross");
+      const statusCell = row.querySelector(".status");
+
+      tickBtn.addEventListener("click", () => {
+        row.classList.remove("not-received");
+        row.classList.add("received");
+        statusCell.textContent = "Đã nhận hồ sơ lưu";
+      });
+
+      crossBtn.addEventListener("click", () => {
+        row.classList.remove("received");
+        row.classList.add("not-received");
+        statusCell.textContent = "Chưa nhận hồ sơ lưu";
+      });
+
+      tbody.appendChild(row);
+    }
+  </script>
+</body>
+</html>
