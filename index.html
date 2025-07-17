@@ -12,6 +12,7 @@
       flex-direction: column;
       align-items: center;
     }
+
     .container {
       background: white;
       padding: 25px 30px;
@@ -20,16 +21,19 @@
       width: 90%;
       max-width: 600px;
     }
+
     h1 {
       text-align: center;
       color: #333;
       margin-bottom: 20px;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
     }
+
     th, td {
       padding: 10px 8px;
       text-align: center;
@@ -37,14 +41,17 @@
       min-width: 150px;
       white-space: nowrap;
     }
+
     tr.received {
       background-color: #d4edda;
       color: #155724;
     }
+
     tr.not-received {
       background-color: #f8d7da;
       color: #721c24;
     }
+
     .btn {
       cursor: pointer;
       font-size: 16px;
@@ -53,28 +60,81 @@
       background: none;
       transition: all 0.2s ease-in-out;
     }
-    .tick {
-      color: green;
-    }
-    .cross {
-      color: red;
-    }
+
+    .tick { color: green; }
+    .cross { color: red; }
+
     .selected {
       transform: scale(1.3);
     }
+
     .footer {
       text-align: center;
       margin-top: 20px;
       font-size: 13px;
       color: #666;
     }
+
     .footer span {
       display: block;
       margin-top: 4px;
     }
+
     .disabled {
       pointer-events: none;
       opacity: 0.5;
+    }
+
+    /* 💥 Modal xác nhận */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0; top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 20px 30px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content p {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .modal-buttons button {
+      padding: 8px 16px;
+      margin: 0 8px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .confirm-btn {
+      background: #28a745;
+      color: white;
+    }
+
+    .cancel-btn {
+      background: #dc3545;
+      color: white;
+    }
+
+    @keyframes fadeIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
@@ -97,9 +157,44 @@
     </div>
   </div>
 
+  <!-- 💥 Modal xác nhận -->
+  <div class="modal" id="confirmModal">
+    <div class="modal-content">
+      <p id="confirmText">Bạn chắc chắn chứ?</p>
+      <div class="modal-buttons">
+        <button class="confirm-btn" id="confirmYes">Xác nhận</button>
+        <button class="cancel-btn" id="confirmNo">Huỷ</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const tbody = document.querySelector("#list tbody");
     const savedStatus = JSON.parse(localStorage.getItem("hoso_status")) || {};
+
+    const modal = document.getElementById("confirmModal");
+    const confirmText = document.getElementById("confirmText");
+    const btnYes = document.getElementById("confirmYes");
+    const btnNo = document.getElementById("confirmNo");
+
+    let pendingAction = null;
+
+    function showModal(message, callback) {
+      confirmText.textContent = message;
+      modal.style.display = "flex";
+      pendingAction = callback;
+    }
+
+    btnYes.onclick = () => {
+      if (pendingAction) pendingAction();
+      modal.style.display = "none";
+      pendingAction = null;
+    };
+
+    btnNo.onclick = () => {
+      modal.style.display = "none";
+      pendingAction = null;
+    };
 
     for (let i = 864; i <= 1000; i++) {
       const row = document.createElement("tr");
@@ -135,27 +230,21 @@
         }
         tickBtn.classList.add("disabled");
         crossBtn.classList.add("disabled");
-
-        // Save to localStorage
         savedStatus[rowId] = type;
         localStorage.setItem("hoso_status", JSON.stringify(savedStatus));
+        tickBtn.blur();
+        crossBtn.blur();
       };
 
       tickBtn.addEventListener("click", () => {
-        if (confirm(`Xác nhận đã nhận hồ sơ số ${i}? Sau khi xác nhận sẽ không chỉnh sửa được nữa.`)) {
-          applyStatus("received");
-          tickBtn.blur();
-        }
+        showModal(`Xác nhận đã nhận hồ sơ số ${i}?`, () => applyStatus("received"));
       });
 
       crossBtn.addEventListener("click", () => {
-        if (confirm(`Xác nhận chưa nhận hồ sơ số ${i}? Sau khi xác nhận sẽ không chỉnh sửa được nữa.`)) {
-          applyStatus("not-received");
-          crossBtn.blur();
-        }
+        showModal(`Xác nhận chưa nhận hồ sơ số ${i}?`, () => applyStatus("not-received"));
       });
 
-      // Nếu đã có trạng thái trước đó thì áp dụng luôn
+      // Áp dụng lại trạng thái đã lưu
       if (saved === "received" || saved === "not-received") {
         applyStatus(saved);
       }
