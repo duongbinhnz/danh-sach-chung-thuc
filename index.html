@@ -30,13 +30,13 @@
       border-collapse: collapse;
       font-size: 14px;
     }
-th, td {
-  padding: 10px 8px;
-  text-align: center;
-  border: 1px solid #ddd;
-  min-width: 150px; /* thêm dòng này */
-  white-space: nowrap; /* ngăn xuống dòng */
-}
+    th, td {
+      padding: 10px 8px;
+      text-align: center;
+      border: 1px solid #ddd;
+      min-width: 150px;
+      white-space: nowrap;
+    }
     tr.received {
       background-color: #d4edda;
       color: #155724;
@@ -72,6 +72,10 @@ th, td {
       display: block;
       margin-top: 4px;
     }
+    .disabled {
+      pointer-events: none;
+      opacity: 0.5;
+    }
   </style>
 </head>
 <body>
@@ -95,9 +99,13 @@ th, td {
 
   <script>
     const tbody = document.querySelector("#list tbody");
+    const savedStatus = JSON.parse(localStorage.getItem("hoso_status")) || {};
 
     for (let i = 864; i <= 1000; i++) {
       const row = document.createElement("tr");
+      const rowId = `stt_${i}`;
+      const saved = savedStatus[rowId];
+
       row.innerHTML = `
         <td>${i}</td>
         <td class="status">-</td>
@@ -111,21 +119,46 @@ th, td {
       const crossBtn = row.querySelector(".cross");
       const statusCell = row.querySelector(".status");
 
+      const applyStatus = (type) => {
+        if (type === "received") {
+          row.classList.add("received");
+          row.classList.remove("not-received");
+          statusCell.textContent = "Đã nhận hồ sơ lưu";
+          tickBtn.classList.add("selected");
+          crossBtn.classList.remove("selected");
+        } else {
+          row.classList.add("not-received");
+          row.classList.remove("received");
+          statusCell.textContent = "Chưa nhận hồ sơ lưu";
+          crossBtn.classList.add("selected");
+          tickBtn.classList.remove("selected");
+        }
+        tickBtn.classList.add("disabled");
+        crossBtn.classList.add("disabled");
+
+        // Save to localStorage
+        savedStatus[rowId] = type;
+        localStorage.setItem("hoso_status", JSON.stringify(savedStatus));
+      };
+
       tickBtn.addEventListener("click", () => {
-        row.classList.remove("not-received");
-        row.classList.add("received");
-        statusCell.textContent = "Đã nhận hồ sơ lưu";
-        tickBtn.classList.add("selected");
-        crossBtn.classList.remove("selected");
+        if (confirm(`Xác nhận đã nhận hồ sơ số ${i}? Sau khi xác nhận sẽ không chỉnh sửa được nữa.`)) {
+          applyStatus("received");
+          tickBtn.blur();
+        }
       });
 
       crossBtn.addEventListener("click", () => {
-        row.classList.remove("received");
-        row.classList.add("not-received");
-        statusCell.textContent = "Chưa nhận hồ sơ lưu";
-        crossBtn.classList.add("selected");
-        tickBtn.classList.remove("selected");
+        if (confirm(`Xác nhận chưa nhận hồ sơ số ${i}? Sau khi xác nhận sẽ không chỉnh sửa được nữa.`)) {
+          applyStatus("not-received");
+          crossBtn.blur();
+        }
       });
+
+      // Nếu đã có trạng thái trước đó thì áp dụng luôn
+      if (saved === "received" || saved === "not-received") {
+        applyStatus(saved);
+      }
 
       tbody.appendChild(row);
     }
