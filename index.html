@@ -29,11 +29,6 @@
       color: #666;
     }
 
-    .header-info span {
-      display: block;
-      margin-top: 4px;
-    }
-
     h1 {
       text-align: center;
       color: #333;
@@ -85,8 +80,12 @@
       opacity: 0.5;
     }
 
-    .export-btn {
+    .button-row {
       margin-top: 20px;
+      text-align: center;
+    }
+
+    .action-btn {
       padding: 10px 20px;
       border: none;
       background-color: #007bff;
@@ -94,10 +93,19 @@
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
+      margin: 0 10px;
     }
 
-    .export-btn:hover {
+    .action-btn:hover {
       background-color: #0056b3;
+    }
+
+    .danger-btn {
+      background-color: #dc3545;
+    }
+
+    .danger-btn:hover {
+      background-color: #a72836;
     }
 
     /* Modal xác nhận */
@@ -124,7 +132,11 @@
 
     .modal-content p {
       font-size: 16px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
+    }
+
+    .modal-buttons {
+      margin-top: 10px;
     }
 
     .modal-buttons button {
@@ -145,6 +157,14 @@
     .cancel-btn {
       background: #dc3545;
       color: white;
+    }
+
+    input[type="password"] {
+      padding: 8px;
+      width: 80%;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
     }
 
     @keyframes fadeIn {
@@ -173,10 +193,13 @@
       <tbody></tbody>
     </table>
 
-    <button class="export-btn" onclick="exportToExcel()">🧾 Xuất Excel</button>
+    <div class="button-row">
+      <button class="action-btn" onclick="exportToExcel()">🧾 Xuất Excel</button>
+      <button class="action-btn danger-btn" onclick="promptReset()">🗑️ Xoá dữ liệu</button>
+    </div>
   </div>
 
-  <!-- Modal xác nhận -->
+  <!-- Modal xác nhận chung -->
   <div class="modal" id="confirmModal">
     <div class="modal-content">
       <p id="confirmText">Bạn chắc chắn chứ?</p>
@@ -187,16 +210,30 @@
     </div>
   </div>
 
-  <!-- SheetJS để xuất Excel -->
+  <!-- Modal nhập mật khẩu -->
+  <div class="modal" id="passwordModal">
+    <div class="modal-content">
+      <p>Nhập mật khẩu để xoá toàn bộ dữ liệu:</p>
+      <input type="password" id="passwordInput" placeholder="••••••••••">
+      <div class="modal-buttons">
+        <button class="confirm-btn" onclick="confirmReset()">Xác nhận</button>
+        <button class="cancel-btn" onclick="closePasswordModal()">Huỷ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SheetJS CDN -->
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script>
     const tbody = document.querySelector("#list tbody");
     const savedStatus = JSON.parse(localStorage.getItem("hoso_status")) || {};
-
     const modal = document.getElementById("confirmModal");
     const confirmText = document.getElementById("confirmText");
     const btnYes = document.getElementById("confirmYes");
     const btnNo = document.getElementById("confirmNo");
+
+    const passwordModal = document.getElementById("passwordModal");
+    const passwordInput = document.getElementById("passwordInput");
 
     let pendingAction = null;
 
@@ -217,6 +254,27 @@
       pendingAction = null;
     };
 
+    function promptReset() {
+      passwordModal.style.display = "flex";
+      passwordInput.value = '';
+      passwordInput.focus();
+    }
+
+    function closePasswordModal() {
+      passwordModal.style.display = "none";
+    }
+
+    function confirmReset() {
+      const entered = passwordInput.value;
+      const secret = atob("dHVuZ2R1b25naGo="); // => "tungduonghj"
+      if (entered === secret) {
+        localStorage.removeItem("hoso_status");
+        location.reload();
+      } else {
+        alert("Sai mật khẩu!");
+      }
+    }
+
     for (let i = 864; i <= 1000; i++) {
       const row = document.createElement("tr");
       const rowId = `stt_${i}`;
@@ -224,7 +282,7 @@
 
       row.innerHTML = `
         <td>${i}</td>
-        <td class="status">-</td>
+        <td class="status">Chưa nhận hồ sơ lưu</td>
         <td class="date">-</td>
         <td>
           <button class="btn tick" title="Đã nhận">✅</button>
@@ -270,7 +328,6 @@
         showModal(`Xác nhận chưa nhận hồ sơ số ${i}?`, () => applyStatus("not-received"));
       });
 
-      // load từ localStorage
       if (saved && saved.type) {
         applyStatus(saved.type, saved.date);
       }
